@@ -1,12 +1,8 @@
-from shared.rabbitmq import consume_event, publish_event
-from shared.events import LOAN_CREATED, CREDIT_CHECKED
-import random
+from shared.rabbitmq import consume_event
+from shared.events import LOAN_CREATED
+from tasks import check_credit_task
 
-def process_loan(loan):
-    credit_score = random.randint(300, 850)
-    loan["credit_score"] = credit_score
-    loan["credit_ok"] = credit_score >= 600
+def on_loan_created(loan):
+    check_credit_task.delay(loan)
 
-    publish_event(CREDIT_CHECKED, loan)
-
-consume_event(LOAN_CREATED, process_loan)
+consume_event(LOAN_CREATED, on_loan_created)

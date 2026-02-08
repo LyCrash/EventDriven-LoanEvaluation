@@ -1,10 +1,9 @@
-from shared.rabbitmq import consume_event, publish_event
-from shared.events import PROPERTY_EVALUATED, LOAN_DECIDED
+from shared.rabbitmq import consume_event
+from shared.events import PROPERTY_EVALUATED
+from tasks import generate_documents_task
 
-def make_decision(loan):
-    approved = loan["credit_ok"] and loan["property_value"] >= loan["amount"]
-    loan["approved"] = approved
+def decide(loan):
+    loan["approved"] = loan["credit_ok"] and loan["property_value"] >= loan["amount"]
+    generate_documents_task.delay(loan)
 
-    publish_event(LOAN_DECIDED, loan)
-
-consume_event(PROPERTY_EVALUATED, make_decision)
+consume_event(PROPERTY_EVALUATED, decide)
