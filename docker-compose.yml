@@ -1,0 +1,44 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  loan-service:
+    build:
+      context: .
+      dockerfile: loan-service/Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - rabbitmq
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+
+  credit-service:
+    build:
+      context: .
+      dockerfile: credit-service/Dockerfile
+    depends_on:
+      - rabbitmq
+
+  property-service:
+    build:
+      context: .
+      dockerfile: property-service/Dockerfile
+    depends_on:
+      - rabbitmq
+
+  decision-service:
+    build:
+      context: .
+      dockerfile: decision-service/Dockerfile
+    depends_on:
+      - rabbitmq
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    depends_on:
+      - rabbitmq
