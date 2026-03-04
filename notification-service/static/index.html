@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Loan Processing Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: white;
+            margin: 0;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: scale(1.02);
+        }
+
+        .approved {
+            border-left: 6px solid #22c55e;
+        }
+
+        .rejected {
+            border-left: 6px solid #ef4444;
+        }
+
+        .loan-id {
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        .status {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .approved-text {
+            color: #22c55e;
+        }
+
+        .rejected-text {
+            color: #ef4444;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🏦 Real-Time Loan Processing Dashboard</h1>
+
+<div class="container" id="updates"></div>
+
+<script>
+    const container = document.getElementById("updates");
+
+    const eventSource = new EventSource("/sse");
+
+    eventSource.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+
+        const card = document.createElement("div");
+        card.classList.add("card");
+
+        if (data.approved) {
+            card.classList.add("approved");
+        } else {
+            card.classList.add("rejected");
+        }
+
+        const statusText = data.approved
+            ? `<span class="approved-text">✅ APPROVED</span>`
+            : `<span class="rejected-text">❌ REJECTED</span>`;
+
+        card.innerHTML = `
+            <div><strong>Client:</strong> ${data.client}</div>
+            <div><strong>Amount:</strong> $${data.amount}</div>
+            <div><strong>Credit Score:</strong> ${data.credit_score ?? "N/A"}</div>
+            <div><strong>Property Value:</strong> ${data.property_value ?? "N/A"}</div>
+            <div class="status">${statusText}</div>
+            <div class="loan-id">Loan ID: ${data.loan_id}</div>
+            <div class="loan-id">Finalized: ${data.finalized_at}</div>
+        `;
+
+        container.prepend(card);
+    };
+</script>
+
+</body>
+</html>

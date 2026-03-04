@@ -1,11 +1,40 @@
 import json
 import os
+import asyncio
+import threading
 from datetime import datetime
+
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
+
 from shared.rabbitmq import consume_event
 from shared.events import LOAN_DECIDED
 
-# Path inside the container where the audit log will be stored
+# -------------------------------------------------
+# Audit Log Configuration (KEEP EXISTING)
+# -------------------------------------------------
+
 LOG_FILE_PATH = "/app/audit/loan_history.jsonl"
+
+# Async queue for real-time push
+event_queue = asyncio.Queue()
+main_loop = None
+
+# -------------------------------------------------
+# FastAPI App
+# -------------------------------------------------
+
+app = FastAPI()
+
+@app.on_event("startup")
+async def startup_event():
+    global main_loop
+    main_loop = asyncio.get_running_loop()
+
+# -------------------------------------------------
+# RabbitMQ Consumer Callback
+# -------------------------------------------------
 
 def audit_notification(loan):
     """
@@ -15,19 +44,70 @@ def audit_notification(loan):
     - Property data (property_value)
     - Result data (approved)
     """
-    # Add a timestamp for the audit trail
+
+    # Add timestamp (KEEP EXISTING BEHAVIOR)
     loan["finalized_at"] = datetime.now().isoformat()
-    
-    # Ensure the directory exists
+
+    # Ensure directory exists
     os.makedirs(os.path.dirname(LOG_FILE_PATH), exist_ok=True)
 
-    # Append the full loan data as a single line in a JSONL file
+    # Append full loan to JSONL audit file
     with open(LOG_FILE_PATH, "a") as f:
         f.write(json.dumps(loan) + "\n")
-    
-    # Visual confirmation in docker logs
+
+    # Log in container
     status = "✅ APPROVED" if loan["approved"] else "❌ REJECTED"
     print(f"Audit Logged: Loan {loan['loan_id']} for {loan['client']} - {status}")
 
-print("Notification Service is active and auditing...")
-consume_event(LOAN_DECIDED, audit_notification)
+    # Push event to async queue for WebSocket & SSE
+    main_loop.call_soon_threadsafe(event_queue.put_nowait, loan)
+
+
+# -------------------------------------------------
+# Start RabbitMQ Consumer in Background Thread
+# -------------------------------------------------
+
+print("Notification Service is active (Audit + Realtime)...")
+
+threading.Thread(
+    target=consume_event,
+    args=(LOAN_DECIDED, audit_notification),
+    daemon=True
+).start()
+
+# -------------------------------------------------
+# 1- WebSocket Endpoint
+# -------------------------------------------------
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    print("Client connected via WebSocket")
+
+    try:
+        while True:
+            loan = await event_queue.get()
+            await websocket.send_json(loan)
+    except WebSocketDisconnect:
+        print("Client disconnected from WebSocket")
+
+
+# -------------------------------------------------
+# 2- Server-Sent Events (SSE)
+# -------------------------------------------------
+
+@app.get("/sse")
+async def sse_endpoint():
+
+    async def event_generator():
+        while True:
+            loan = await event_queue.get()
+            yield f"data: {json.dumps(loan)}\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream"
+    )
+
+# Serve dashboard static files
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
