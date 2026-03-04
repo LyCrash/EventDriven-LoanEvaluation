@@ -2,6 +2,8 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+ENV PYTHONUNBUFFERED=1
+
 # Copy service code
 COPY credit-service/main.py credit-service/tasks.py ./
 

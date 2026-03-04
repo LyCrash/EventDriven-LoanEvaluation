@@ -2,6 +2,8 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+ENV PYTHONUNBUFFERED=1
+
 # Copy service code
 COPY property-service/main.py property-service/tasks.py ./
 
