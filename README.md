@@ -12,7 +12,6 @@ The system is composed of several microservices communicating through RabbitMQ e
 
 ![Architecture-diagram](./results/architecture.png)
 
-Services:
 
 | Service              | Role                                            |
 | -------------------- | ----------------------------------------------- |
@@ -137,8 +136,8 @@ Install:
 From the project root:
 
 ```bash
-docker compose build
-docker compose up
+docker-compose build
+docker-compose up
 ```
 
 This launches:
