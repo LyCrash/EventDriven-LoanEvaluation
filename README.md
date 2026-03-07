@@ -10,7 +10,7 @@ The project demonstrates how modern distributed systems handle asynchronous work
 
 The system is composed of several microservices communicating through RabbitMQ events.
 
-![Architecture-diagram](results\architecture.png)
+![Architecture-diagram](./results/architecture.png)
 
 Services:
 
@@ -63,7 +63,7 @@ Technologies used:
 * FastAPI
 * Docker
 
-**Results**: screenshots available in [here](results\exo-1)
+**Results**: screenshots available in [here](./results/exo-1)
 
 ---
 
