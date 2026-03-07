@@ -41,20 +41,6 @@ Services:
 
 **Goal:** Create a distributed system where services communicate through events.
 
-Flow:
-
-```
-Loan Created
-     ↓
-Credit Service
-     ↓
-Property Service
-     ↓
-Decision Service
-     ↓
-Notification Service
-```
-
 **Why:** Loose coupling between services allows better scalability and independent deployment.
 
 Technologies used:
@@ -63,7 +49,7 @@ Technologies used:
 * FastAPI
 * Docker
 
-**Results**: screenshots available in [here](./results/exo-1)
+**Results**: screenshots available [here](./results/exo-1)
 
 ---
 
@@ -87,6 +73,7 @@ Tasks executed asynchronously:
 * Fault tolerance
 * Horizontal scaling
 
+**Results**: screenshots available [here](./results/exo-2)
 ---
 
 ## Exercise 3 — Messaging Reliability & Compensation
@@ -111,6 +98,7 @@ compensate_credit_check
 * Avoid inconsistent system state
 * Guarantee business transaction integrity
 
+**Results**: screenshots available [here](./results/exo-3)
 ---
 
 ## Exercise 4 — Real-Time Notifications
@@ -130,6 +118,7 @@ Technologies used:
 * audit trail logging (a jsonl file inside the notification-service container)
 * event streaming
 
+**Results**: screenshots available [here](./results/exo-4)
 ---
 
 # Running the Project
@@ -175,13 +164,19 @@ RabbitMQ Management
 http://localhost:15672
 ```
 
-Default login:
+Default RabbitMQ login:
 
 ```
 guest / guest
 ```
 
-Real-time Dashboard
+Celery monitoring (with Flower):
+
+```
+http://localhost:5555
+```
+
+Real-time Dashboard for Notifications
 
 ```
 http://localhost:8001
@@ -210,7 +205,7 @@ Example request:
 
 Step 2 — Observe Processing
 
-RabbitMQ queues process:
+RabbitMQ queues and Flower process:
 
 * credit check
 * property evaluation
@@ -227,22 +222,6 @@ http://localhost:8001
 ```
 
 You will see the loan status appear instantly.
-
----
-
-# Monitoring
-
-Celery monitoring (with Flower):
-
-```
-http://localhost:5555
-```
-
-RabbitMQ queues:
-
-```
-http://localhost:15672
-```
 
 ---
 
