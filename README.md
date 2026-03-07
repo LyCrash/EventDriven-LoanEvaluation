@@ -74,15 +74,14 @@ Tasks executed asynchronously:
 * Horizontal scaling
 
 **Results**: screenshots available [here](./results/exo-2)
+
 ---
 
 ## Exercise 3 — Messaging Reliability & Compensation
 
 **Goal:** Ensure consistency if part of the workflow fails.
 
-Example scenario:
-
-Property evaluation fails after credit check succeeded.
+**Example scenario:** Property evaluation fails after credit check succeeded.
 
 **Solution:** Implement compensation logic:
 
@@ -99,6 +98,7 @@ compensate_credit_check
 * Guarantee business transaction integrity
 
 **Results**: screenshots available [here](./results/exo-3)
+
 ---
 
 ## Exercise 4 — Real-Time Notifications
@@ -110,7 +110,6 @@ Technologies used:
 * Server Sent Events
 * WebSockets
 * FastAPI streaming
-* Real-time dashboard
 
 **Features:**
 
@@ -119,6 +118,7 @@ Technologies used:
 * event streaming
 
 **Results**: screenshots available [here](./results/exo-4)
+
 ---
 
 # Running the Project
